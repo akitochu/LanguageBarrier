@@ -9,9 +9,15 @@ app.get('/chat', (req, res) => {
   res.sendFile(__dirname + '/chat.html');
 });
 
+let userCount = 0;
+
 io.on('connection', (socket) => {
   console.log('User Online');
-  
+  socket.on('send-username', (username) => {
+    userCount += 1;
+    console.log(userCount);
+    socket.broadcast.emit('new-user', userCount);
+  });
   socket.on('codeboard-message', (msg) => {
     console.log('message: ' + msg);
 	socket.broadcast.emit('message-from-others', msg);
