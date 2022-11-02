@@ -1,0 +1,21 @@
+#sendMessage {
+    position:absolute;
+    bottom:0;
+    right:0;
+}
+
+#textBox {
+    font-size: 17px; 
+    line-height: 17px; 
+    padding: 19px;
+    width:500px;
+
+}
+
+#sendButton{
+    font-size: 17px; 
+    line-height: 17px; 
+    padding: 19px;
+}
+
+
