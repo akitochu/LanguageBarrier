@@ -22,7 +22,15 @@ io.on('connection', (socket) => {
     console.log('message: ' + msg);
 	socket.broadcast.emit('message-from-others', msg);
   });
-  
+  socket.on('disconnect', function(data) {
+    for (var i=0; i < users.length; i++){
+      if (users[i] === thisUsername){
+        users.splice(i, 1);
+        i--;
+      }
+    }
+    socket.broadcast.emit('update-users', users)
+  })
 });
 
 var server_port = process.env.YOUR_PORT || process.env.PORT || 3000;
