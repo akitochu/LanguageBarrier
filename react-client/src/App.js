@@ -2,32 +2,64 @@ import React, { useState, useRef, useEffect } from 'react';
 import MessageLog from "./MessageLog"; 
 import "./layout.css";
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 const { io } = require("socket.io-client");
 
 let socket = null;
 
 function App() {
-  const [liveUsers, updateUserCount] = useState(0);
+  const [users, updateUsers] = useState([]);
   const [messages, setMessages] = useState([])
+  const [username, setUsername] = useState([])
   const messageRef = useRef()
   const usernameRef = useRef()
+  let usernameSet = false;
+  let thisUsername = '';
   useEffect(() => {
     if (!socket){
       socket = io.connect('http://localhost:3000');
-      socket.on('new-user', (userCount) => {
-        updateUserCount(userCount);
-        console.log(liveUsers);
+      socket.on('new-user', (userCount, users) => {
+        updateUsers(users)
+        socket.emit('codeboard-message', "uptodate");      
       });      
+      socket.on('update-users', (users) => {
+        updateUsers(users);
+      });
       socket.on('message-from-others', function(message){
         console.log('Received ' + message);
-        addMessage(message)
+        if (typeof message === "string"){
+          addMessage(message)
+        }else { 
+          for (let i = 0; i<message.length; i++){
+            addMessage(message[i])
+          }
+        }
+        
+      })
+      socket.on('check-for-updating-username', (newUsername) =>{
+        if(usernameSet === true){
+          socket.emit('update-username', newUsername, thisUsername)
+          thisUsername = newUsername
+          setUsername(newUsername)
+        }else{
+          usernameSet = true;
+          thisUsername = newUsername
+          socket.emit('new-username', newUsername)
+        }
       })
     }
   }, []);
 
   function sendMessage(e) {
-    const message = messageRef.current.value
-    if (message === "") return
+    const message = username + ": " + messageRef.current.value
+    console.log(message)
+    if (messageRef.current.value === "") return
+    console.log(username)
+    if (username.length === 0){
+      messageRef.current.value = null
+      window.alert("Enter Username First")
+      return
+    } 
     addMessage(message)
     socket.emit('codeboard-message', message);
     messageRef.current.value = null
@@ -40,8 +72,13 @@ function App() {
   }
 
   function sendUsername(e) {
-    updateUserCount(liveUsers + 1);
     const username = usernameRef.current.value
+    updateUsers(prevUsers => {
+      return [...prevUsers, username]
+    });
+    setUsername(prevUsername => {
+      return [...prevUsername, username]
+    })
     if (username === "") return
     socket.emit('send-username', username);
     usernameRef.current.value = null
