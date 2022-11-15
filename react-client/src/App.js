@@ -4,8 +4,12 @@ import "./layout.css";
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 const { io } = require("socket.io-client");
+//const {Translate} = require('@google-cloud/translate').v2;
+
+const key = 'AIzaSyBMb5PxGr6kseebULyDBh0Xe7WeiM2I33k'
 
 let socket = null;
+
 
 function App() {
   const [users, updateUsers] = useState([]);
@@ -84,6 +88,22 @@ function App() {
     usernameRef.current.value = null
   }
 
+  function translateMessage(e) {
+    const text = messageRef.current.value
+    axios.get('https://translation.googleapis.com/language/translate/v2?key='+key+'&format=text&target=ja&q='+text).then(res => {
+      let translatedMessage = JSON.stringify(res.data.data.translations[0].translatedText);
+      console.log("success!", translatedMessage);
+      let message = username + ": " + translatedMessage.slice(1,translatedMessage.length-1)
+      addMessage(message)
+      socket.emit('codeboard-message', message);
+      messageRef.current.value = null
+    }).catch(err=>{
+      console.log(err)
+      return
+    });
+  }
+  
+
   return (
     <>
       <div>Username:</div>
@@ -94,7 +114,7 @@ function App() {
         <input ref={usernameRef} type="text" />
         <button onClick={sendUsername}>Confirm Username</button>
       </div>
-      <select data-placeholder="Choose a Language...">
+      <select id="language" data-placeholder="Choose a Language...">
         <option value="AF">Afrikaans</option>
         <option value="SQ">Albanian</option>
         <option value="AR">Arabic</option>
@@ -176,6 +196,7 @@ function App() {
       <div id="sendMessage">
         <input id="textBox" ref={messageRef} type="text" />
         <button id="sendButton" onClick={sendMessage}>Send</button>
+        <button id="translateButton" onClick={translateMessage}>Translate</button>
       </div>
     </>
     
