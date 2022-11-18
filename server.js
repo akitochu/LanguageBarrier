@@ -51,10 +51,16 @@ io.on('connection', (socket) => {
       }
     }else{
       chatLog.push(msg);
+      console.log(msg);
       console.log(chatLog);
 	    socket.broadcast.emit('message-from-others', msg);
     }
   });
+
+  socket.on('add-translation', (message) => {
+    console.log(message)
+  })
+  
   socket.on('disconnect', function(data) {
     for (var i=0; i < users.length; i++){
       if (users[i] === thisUsername){

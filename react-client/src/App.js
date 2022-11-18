@@ -17,6 +17,7 @@ function App() {
   const [username, setUsername] = useState([])
   const messageRef = useRef()
   const usernameRef = useRef()
+  const languageRef = useRef()
   let usernameSet = false;
   let thisUsername = '';
   useEffect(() => {
@@ -33,6 +34,28 @@ function App() {
         console.log('Received ' + message);
         if (typeof message === "string"){
           addMessage(message)
+        }else if (typeof message === "object") {
+           let languages = Object.keys(message.messageLanguagePairings)
+           let thisLanguage = languageRef.current.value
+           if (languages.includes(thisLanguage)){
+             console.log(message.messageLanguagePairings[thisLanguage])
+             addMessage(message.messageLanguagePairings[thisLanguage])
+           }else{
+            let originalLanguage = Object.keys(message.messageLanguagePairings)[0]
+            console.log("original language",originalLanguage)
+            axios.get('https://translation.googleapis.com/language/translate/v2?key='+key+'&format=text&target='+thisLanguage+'&q='+message.messageLanguagePairings[originalLanguage]).then(res => {
+            let translatedMessage = JSON.stringify(res.data.data.translations[0].translatedText);
+            console.log("success!", translatedMessage);
+            let formatedMessage = username + ": " + translatedMessage.slice(1,translatedMessage.length-1)
+            addMessage(formatedMessage)
+            let newTranslation = {[thisLanguage]: translateMessage}
+            socket.emit('add-translation', newTranslation);
+    
+            }).catch(err=>{
+              console.log(err)
+              return
+            }); 
+           }
         }else { 
           for (let i = 0; i<message.length; i++){
             addMessage(message[i])
@@ -55,8 +78,18 @@ function App() {
   }, []);
 
   function sendMessage(e) {
+    console.log(languageRef.current.value)
     const message = username + ": " + messageRef.current.value
+     
     console.log(message)
+    let originalLanguage = languageRef.current.value
+    let messageObj = {
+      username: username + ": ",
+      messageLanguagePairings: {
+        [originalLanguage]: messageRef.current.value 
+      }
+    }
+    console.log(messageObj)
     if (messageRef.current.value === "") return
     console.log(username)
     if (username.length === 0){
@@ -65,7 +98,7 @@ function App() {
       return
     } 
     addMessage(message)
-    socket.emit('codeboard-message', message);
+    socket.emit('codeboard-message', messageObj);
     messageRef.current.value = null
   }
 
@@ -114,7 +147,7 @@ function App() {
         <input ref={usernameRef} type="text" />
         <button onClick={sendUsername}>Confirm Username</button>
       </div>
-      <select id="language" data-placeholder="Choose a Language...">
+      <select id="language" ref={languageRef} data-placeholder="Choose a Language...">
         <option value="AF">Afrikaans</option>
         <option value="SQ">Albanian</option>
         <option value="AR">Arabic</option>
