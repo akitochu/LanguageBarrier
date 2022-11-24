@@ -9,6 +9,7 @@ const { io } = require("socket.io-client");
 const key = 'AIzaSyBMb5PxGr6kseebULyDBh0Xe7WeiM2I33k'
 
 let socket = null;
+let previousMsg = "";
 
 
 function App() {
@@ -52,6 +53,13 @@ function App() {
             addMessage(message[i])
           }
         }
+       
+      socket.on('translated-message', (message) =>{
+        if (previousMsg != message){
+          addMessage(message)
+        }
+        previousMsg = message
+      })
         
       })
       socket.on('check-for-updating-username', (newUsername) =>{
