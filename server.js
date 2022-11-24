@@ -1,7 +1,10 @@
+
 var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
+var axios = require('axios');
+const key = 'AIzaSyBMb5PxGr6kseebULyDBh0Xe7WeiM2I33k'
 
 app.use(express.static('react-client/build'))
 
@@ -46,7 +49,6 @@ io.on('connection', (socket) => {
         console.log("chatlog empty")
         return
       }else{
-        console.log("gotinif")
         socket.emit('message-from-others', chatLog)
       }
     }else{
@@ -59,6 +61,24 @@ io.on('connection', (socket) => {
 
   socket.on('add-translation', (message) => {
     console.log(message)
+  })
+
+  socket.on('translate', (language, originalMessage, username) => {
+    axios.get('https://translation.googleapis.com/language/translate/v2?key='+key+'&format=text&target='+language+'&q='+originalMessage).then(res => {
+    let translatedMessage = JSON.stringify(res.data.data.translations[0].translatedText);
+    let formatedMessage = username + translatedMessage.slice(1,translatedMessage.length-1)
+    let newTranslation = {
+      language: language,
+      message: translatedMessage
+    }
+    chatLog[chatLog.length-1].messageLanguagePairings.push(newTranslation)
+    socket.emit('translated-message', formatedMessage)
+    
+
+    }).catch(err=>{
+      console.log(err)
+      return
+    }); 
   })
   
   socket.on('disconnect', function(data) {

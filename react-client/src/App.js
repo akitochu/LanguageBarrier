@@ -35,26 +35,17 @@ function App() {
         if (typeof message === "string"){
           addMessage(message)
         }else if (typeof message === "object") {
-           let languages = Object.keys(message.messageLanguagePairings)
+           let languages = message.messageLanguagePairings.map((obj) => obj.language)
+           console.log("languages",languages)
            let thisLanguage = languageRef.current.value
            if (languages.includes(thisLanguage)){
              console.log(message.messageLanguagePairings[thisLanguage])
              addMessage(message.messageLanguagePairings[thisLanguage])
            }else{
-            let originalLanguage = Object.keys(message.messageLanguagePairings)[0]
+            let originalLanguage = message.messageLanguagePairings[0].language
             console.log("original language",originalLanguage)
-            axios.get('https://translation.googleapis.com/language/translate/v2?key='+key+'&format=text&target='+thisLanguage+'&q='+message.messageLanguagePairings[originalLanguage]).then(res => {
-            let translatedMessage = JSON.stringify(res.data.data.translations[0].translatedText);
-            console.log("success!", translatedMessage);
-            let formatedMessage = username + ": " + translatedMessage.slice(1,translatedMessage.length-1)
-            addMessage(formatedMessage)
-            let newTranslation = {[thisLanguage]: translateMessage}
-            socket.emit('add-translation', newTranslation);
-    
-            }).catch(err=>{
-              console.log(err)
-              return
-            }); 
+  
+            socket.emit('translate', thisLanguage, message.messageLanguagePairings[0].message, message.username)
            }
         }else { 
           for (let i = 0; i<message.length; i++){
@@ -85,9 +76,10 @@ function App() {
     let originalLanguage = languageRef.current.value
     let messageObj = {
       username: username + ": ",
-      messageLanguagePairings: {
-        [originalLanguage]: messageRef.current.value 
-      }
+      messageLanguagePairings: [{
+        language: originalLanguage,
+        message: messageRef.current.value
+      }]
     }
     console.log(messageObj)
     if (messageRef.current.value === "") return
