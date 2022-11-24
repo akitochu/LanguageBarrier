@@ -43,19 +43,21 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('new-user', userCount, users);
   })
   socket.on('codeboard-message', (msg) => {
+    console.log("TESTING HERE",msg)
     if (msg === "uptodate") {
       console.log(chatLog)
       if (chatLog.length === 0){
         console.log("chatlog empty")
         return
       }else{
-        socket.emit('message-from-others', chatLog)
+        console.log("!!!!!!!!!", chatLog)
+        socket.emit('message-from-others', chatLog, "chat log")
       }
     }else{
       chatLog.push(msg);
       console.log(msg);
       console.log(chatLog);
-	    socket.broadcast.emit('message-from-others', msg);
+	    socket.broadcast.emit('message-from-others', msg, "msg");
     }
   });
 

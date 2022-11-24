@@ -31,28 +31,31 @@ function App() {
       socket.on('update-users', (users) => {
         updateUsers(users);
       });
-      socket.on('message-from-others', function(message){
+      socket.on('message-from-others', (message, type) => {
         console.log('Received ' + message);
         if (typeof message === "string"){
           addMessage(message)
-        }else if (typeof message === "object") {
-           let languages = message.messageLanguagePairings.map((obj) => obj.language)
-           console.log("languages",languages)
-           let thisLanguage = languageRef.current.value
-           if (languages.includes(thisLanguage)){
-             console.log(message.messageLanguagePairings[thisLanguage])
-             addMessage(message.messageLanguagePairings[thisLanguage])
-           }else{
-            let originalLanguage = message.messageLanguagePairings[0].language
-            console.log("original language",originalLanguage)
-  
-            socket.emit('translate', thisLanguage, message.messageLanguagePairings[0].message, message.username)
-           }
-        }else { 
-          for (let i = 0; i<message.length; i++){
-            addMessage(message[i])
+        }else if (type === "chat log"){
+          let chatLog = message
+          for (let i = 0; i<chatLog.length; i++){
+            let message = chatLog[i].username + chatLog[i].messageLanguagePairings[0].message
+            addMessage(message)
           }
+        }else { 
+            let languages = message.messageLanguagePairings.map((obj) => obj.language)
+            console.log("languages",languages)
+            let thisLanguage = languageRef.current.value
+            if (languages.includes(thisLanguage)){
+              console.log(message.messageLanguagePairings[thisLanguage])
+              addMessage(message.messageLanguagePairings[thisLanguage])
+            }else{
+             let originalLanguage = message.messageLanguagePairings[0].language
+             console.log("original language",originalLanguage)
+   
+             socket.emit('translate', thisLanguage, message.messageLanguagePairings[0].message, message.username)
+            }
         }
+
        
       socket.on('translated-message', (message) =>{
         if (previousMsg != message){
