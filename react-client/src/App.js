@@ -24,9 +24,11 @@ function App() {
   useEffect(() => {
     if (!socket){
       socket = io.connect('http://localhost:3000');
-      socket.on('new-user', (userCount, users) => {
+      socket.on('new-user', (userCount, users, newuser) => {
         updateUsers(users)
-        socket.emit('codeboard-message', "uptodate");      
+        if (thisUsername === newuser){
+          socket.emit('codeboard-message', "uptodate"); 
+        }     
       });      
       socket.on('update-users', (users) => {
         updateUsers(users);

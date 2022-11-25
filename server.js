@@ -27,8 +27,8 @@ io.on('connection', (socket) => {
     userCount += 1;
     users.push(username);
     thisUsername = username
-    socket.emit('new-user', userCount, users)
-    socket.broadcast.emit('new-user', userCount, users);
+    socket.emit('new-user', userCount, users, username)
+    socket.broadcast.emit('new-user', userCount, users, username);
   });
   socket.on('update-username', (username, oldUsername) => {
     for (var i=0; i < users.length; i++){
