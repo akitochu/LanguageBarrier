@@ -113,6 +113,12 @@ function App() {
     })
   }
 
+  function clearMessages() {
+    setMessages(prevMessages => {
+      return []
+    })
+  }
+
   function sendUsername(e) {
     const username = usernameRef.current.value
     updateUsers(prevUsers => {
@@ -141,6 +147,12 @@ function App() {
     });
   }
   
+  function updateTranslation(e) {
+    clearMessages()
+    let newLanguage = languageRef.current.value
+    socket.emit('update-translation', newLanguage)
+  }
+  
 
   return (
     <>
@@ -152,7 +164,7 @@ function App() {
         <input ref={usernameRef} type="text" />
         <button onClick={sendUsername}>Confirm Username</button>
       </div>
-      <select id="language" ref={languageRef} data-placeholder="Choose a Language...">
+      <select id="language" ref={languageRef} onChange={updateTranslation} data-placeholder="Choose a Language...">
         <option value="AF">Afrikaans</option>
         <option value="SQ">Albanian</option>
         <option value="AR">Arabic</option>

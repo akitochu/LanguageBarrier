@@ -43,20 +43,14 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('new-user', userCount, users);
   })
   socket.on('codeboard-message', (msg) => {
-    console.log("TESTING HERE",msg)
     if (msg === "uptodate") {
-      console.log(chatLog)
       if (chatLog.length === 0){
-        console.log("chatlog empty")
         return
       }else{
-        console.log("!!!!!!!!!", chatLog)
         socket.emit('message-from-others', chatLog, "chat log")
       }
     }else{
       chatLog.push(msg);
-      console.log(msg);
-      console.log(chatLog);
 	    socket.broadcast.emit('message-from-others', msg, "msg");
     }
   });
@@ -68,19 +62,60 @@ io.on('connection', (socket) => {
   socket.on('translate', (language, originalMessage, username) => {
     axios.get('https://translation.googleapis.com/language/translate/v2?key='+key+'&format=text&target='+language+'&q='+originalMessage).then(res => {
     let translatedMessage = JSON.stringify(res.data.data.translations[0].translatedText);
-    let formatedMessage = username + translatedMessage.slice(1,translatedMessage.length-1)
+    let formattedMessage = username + translatedMessage.slice(1,translatedMessage.length-1)
     let newTranslation = {
       language: language,
       message: translatedMessage
     }
     chatLog[chatLog.length-1].messageLanguagePairings.push(newTranslation)
-    socket.emit('translated-message', formatedMessage)
-    
-
+    socket.emit('translated-message', formattedMessage)  
     }).catch(err=>{
       console.log(err)
       return
     }); 
+  })
+
+
+  async function translateAllMessages (newLanguage){
+    if (chatLog.length > 0){
+      for (let m=0; m < chatLog.length; m++){
+        let languages = chatLog[m].messageLanguagePairings.map((obj) => obj.language)
+        if (languages.includes(newLanguage)){
+          let location = languages.indexOf(newLanguage)
+          let formattedMessage = chatLog[m].username + chatLog[m].messageLanguagePairings[location].message
+          socket.emit('translated-message', formattedMessage) 
+        }else{
+          axios.get('https://translation.googleapis.com/language/translate/v2?key='+key+'&format=text&target='+newLanguage+'&q='+chatLog[m].messageLanguagePairings[0].message, chatLog[m].username).then(res => {
+            let translatedMessage = JSON.stringify(res.data.data.translations[0].translatedText);
+            let formattedMessage = chatLog[m].username + translatedMessage.slice(1,translatedMessage.length-1)
+            let newTranslation = {
+              language: newLanguage,
+              message: translatedMessage
+            }
+            let newTranslationMessage = {
+              username: chatLog[m].username,
+              messageLanguagePairings:[{
+                language: newLanguage,
+                message: translatedMessage
+              }]
+            }
+            chatLog[m].messageLanguagePairings.push(newTranslation)
+            socket.emit('translated-message', formattedMessage) 
+            }).catch(err=>{
+              console.log(err)
+              return
+            }); 
+            
+        }
+      }  
+    }
+  }
+
+  socket.on('update-translation', (newLanguage) => {
+    translateAllMessages(newLanguage).then(result => {
+    }).catch(err => {
+      console.log(err);
+    })
   })
   
   socket.on('disconnect', function(data) {
