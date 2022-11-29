@@ -23,7 +23,7 @@ function App() {
   let thisUsername = '';
   useEffect(() => {
     if (!socket){
-      socket = io.connect('http://language-barrier.herokuapp.com/');
+      socket = io.connect('https://language-barrier.herokuapp.com/');
       socket.on('new-user', (userCount, users, newuser) => {
         updateUsers(users)
         if (thisUsername === newuser){
