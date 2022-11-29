@@ -61,6 +61,7 @@ io.on('connection', (socket) => {
 
   socket.on('translate', (language, originalMessage, username) => {
     axios.get('https://translation.googleapis.com/language/translate/v2?key='+key+'&format=text&target='+language+'&q='+originalMessage).then(res => {
+    console.log(JSON.stringify(res.data))
     let translatedMessage = JSON.stringify(res.data.data.translations[0].translatedText);
     let formattedMessage = username + translatedMessage.slice(1,translatedMessage.length-1)
     let newTranslation = {
