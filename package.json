@@ -4,7 +4,7 @@
   "description": "Pre-requisite\r cd react-client\r npm run build",
   "main": "server.js",
   "scripts": {
-    "prestart": "cd react-client && npm run build && cd ..",
+    "prestart": "cd react-client && npm install && npm run build && cd ..",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
