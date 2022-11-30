@@ -60,7 +60,7 @@ function App() {
 
        
       socket.on('translated-message', (message) =>{
-        if (previousMsg != message){
+        if (previousMsg != message && previousMsg != ""){
           addMessage(message)
         }
         previousMsg = message
