@@ -12,10 +12,12 @@ let socket = null;
 let previousMsg = "";
 
 
+
 function App() {
   const [users, updateUsers] = useState([]);
   const [messages, setMessages] = useState([])
   const [username, setUsername] = useState([])
+  const [yourMessages, setYourMessages] = useState([])
   const messageRef = useRef()
   const usernameRef = useRef()
   const languageRef = useRef()
@@ -37,11 +39,13 @@ function App() {
         console.log('Received ' + message);
         if (typeof message === "string"){
           addMessage(message)
+          addYourMessage("|")
         }else if (type === "chat log"){
           let chatLog = message
           for (let i = 0; i<chatLog.length; i++){
             let message = chatLog[i].username + chatLog[i].messageLanguagePairings[0].message
             addMessage(message)
+            addYourMessage("|")
           }
         }else { 
             let languages = message.messageLanguagePairings.map((obj) => obj.language)
@@ -50,6 +54,7 @@ function App() {
             if (languages.includes(thisLanguage)){
               console.log(message.messageLanguagePairings[thisLanguage])
               addMessage(message.messageLanguagePairings[thisLanguage])
+              addYourMessage("|")
             }else{
              let originalLanguage = message.messageLanguagePairings[0].language
              console.log("original language",originalLanguage)
@@ -60,8 +65,10 @@ function App() {
 
        
       socket.on('translated-message', (message) =>{
-        if (previousMsg != message && previousMsg != ""){
+        console.log(previousMsg, "testing here: ", message)
+        if (previousMsg != message){
           addMessage(message)
+          addYourMessage("|")
         }
         previousMsg = message
       })
@@ -102,19 +109,31 @@ function App() {
       window.alert("Enter Username First")
       return
     } 
-    addMessage(message)
+    addMessage("|")
+    addYourMessage(message)
     socket.emit('codeboard-message', messageObj);
     messageRef.current.value = null
   }
 
   function addMessage(message) {
+    console.log(message, "testing here")
     setMessages(prevMessages => {
+      return [...prevMessages, {id: uuidv4(), original: message}]
+    })
+  }
+
+  function addYourMessage(message) {
+    console.log(message, "testing here 2")
+    setYourMessages(prevMessages => {
       return [...prevMessages, {id: uuidv4(), original: message}]
     })
   }
 
   function clearMessages() {
     setMessages(prevMessages => {
+      return []
+    })
+    setYourMessages(prevMessages => {
       return []
     })
   }
@@ -132,20 +151,7 @@ function App() {
     usernameRef.current.value = null
   }
 
-  function translateMessage(e) {
-    const text = messageRef.current.value
-    axios.get('https://translation.googleapis.com/language/translate/v2?key='+key+'&format=text&target=ja&q='+text).then(res => {
-      let translatedMessage = JSON.stringify(res.data.data.translations[0].translatedText);
-      console.log("success!", translatedMessage);
-      let message = username + ": " + translatedMessage.slice(1,translatedMessage.length-1)
-      addMessage(message)
-      socket.emit('codeboard-message', message);
-      messageRef.current.value = null
-    }).catch(err=>{
-      console.log(err)
-      return
-    });
-  }
+
   
   function updateTranslation(e) {
     clearMessages()
@@ -238,15 +244,22 @@ function App() {
         <option value="CY">Welsh</option>
         <option value="XH">Xhosa</option>
       </select>
+      <div>
+      Chat:
+      </div>
+      <div id="chatContainer">
+        <div id="chatChild">
+          <MessageLog messages={messages}/>
+        </div>
 
-      <div id="chatBox">Chat:
-        <MessageLog messages={messages}/>
+        <div id="chatChild">
+          <MessageLog messages={yourMessages}/>
+        </div>
       </div>
 
       <div id="sendMessage">
         <input id="textBox" ref={messageRef} type="text" />
         <button id="sendButton" onClick={sendMessage}>Send</button>
-        <button id="translateButton" onClick={translateMessage}>Translate</button>
       </div>
     </>
     

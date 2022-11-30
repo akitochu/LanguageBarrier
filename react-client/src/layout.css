@@ -18,4 +18,19 @@
     padding: 19px;
 }
 
+#chatContainer{
+    display: flex;
+}
 
+#chatChild{
+    flex: 1;
+}
+
+#chatChild:first-child{
+    margin-right: 100px;
+    padding-right: 100px;
+}
+
+#chatChild:nth-child(2){
+    color: blue;
+}

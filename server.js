@@ -101,6 +101,7 @@ io.on('connection', (socket) => {
               }]
             }
             chatLog[m].messageLanguagePairings.push(newTranslation)
+            console.log("testing here: ", formattedMessage)
             socket.emit('translated-message', formattedMessage) 
             }).catch(err=>{
               console.log(err)
