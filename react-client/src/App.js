@@ -37,6 +37,7 @@ function App() {
       });
       socket.on('message-from-others', (message, type) => {
         console.log('Received ' + message);
+        console.log("test")
         if (typeof message === "string"){
           addMessage(message)
           addYourMessage("|")
