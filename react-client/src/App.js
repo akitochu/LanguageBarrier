@@ -12,8 +12,8 @@ let socket = null;
 let previousMsg = "";
 
 
-
 function App() {
+
   const [users, updateUsers] = useState([]);
   const [messages, setMessages] = useState([])
   const [username, setUsername] = useState([])
@@ -23,6 +23,7 @@ function App() {
   const languageRef = useRef()
   let usernameSet = false;
   let thisUsername = '';
+
   useEffect(() => {
     if (!socket){
       socket = io.connect(window.location.origin);
@@ -140,6 +141,8 @@ function App() {
   }
 
   function sendUsername(e) {
+    let enterUsername = document.getElementById("enterUsernameField")
+    let chatHeader = document.getElementById("chatHeader")
     const username = usernameRef.current.value
     updateUsers(prevUsers => {
       return [...prevUsers, username]
@@ -150,6 +153,16 @@ function App() {
     if (username === "") return
     socket.emit('send-username', username);
     usernameRef.current.value = null
+    enterUsername.style.display = "none";
+    chatHeader.style.display = "none";
+    fetch('https://extreme-ip-lookup.com/json/?key=CBZijvNC629iYtajlvBl')
+    .then( res => res.json())
+    .then(response => {
+        console.log("Country: ", response.country);
+    })
+    .catch((data, status) => {
+        console.log('Request failed');
+    })
   }
 
 
@@ -159,6 +172,17 @@ function App() {
     let newLanguage = languageRef.current.value
     socket.emit('update-translation', newLanguage)
   }
+
+  function handleKeyDown (event) {
+    console.log('User pressed: ', event.key);
+
+    // console.log(message);
+
+    if (event.key === 'Enter') {
+      // 👇️ your logic here
+      console.log('Enter key pressed ✅');
+    }
+  };
   
 
   return (
@@ -167,7 +191,7 @@ function App() {
       {username}
       <div>Online Users:</div>
       {users}
-      <div>
+      <div id="enterUsernameField">
         <input ref={usernameRef} type="text" />
         <button onClick={sendUsername}>Confirm Username</button>
       </div>
@@ -245,7 +269,7 @@ function App() {
         <option value="CY">Welsh</option>
         <option value="XH">Xhosa</option>
       </select>
-      <div>
+      <div id="chatHeader">
       Chat:
       </div>
       <div id="chatContainer">
@@ -260,7 +284,7 @@ function App() {
 
       <div id="sendMessage">
         <input id="textBox" ref={messageRef} type="text" />
-        <button id="sendButton" onClick={sendMessage}>Send</button>
+        <button id="sendButton" onKeyDown={handleKeyDown} onClick={sendMessage} tabIndex="0" >Send</button>
       </div>
     </>
     

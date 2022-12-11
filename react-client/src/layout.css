@@ -34,3 +34,8 @@
 #chatChild:nth-child(2){
     color: blue;
 }
+
+#chatHeader{
+    display: block;
+    color: red;
+}
