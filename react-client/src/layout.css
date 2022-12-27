@@ -1,4 +1,5 @@
 #sendMessage {
+    display:none;
     position:absolute;
     bottom:0;
     right:0;
@@ -36,6 +37,22 @@
 }
 
 #chatHeader{
-    display: block;
-    color: red;
+    display: none;
+}
+
+#title{
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+}
+
+#header{
+    background-color: teal;
+    display: none;
+}
+
+
+
+#main{
+    background-color: lavender;
 }
