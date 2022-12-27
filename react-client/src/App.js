@@ -3,8 +3,11 @@ import MessageLog from "./MessageLog";
 import "./layout.css";
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Card, Button } from 'react-bootstrap';
 const { io } = require("socket.io-client");
 //const {Translate} = require('@google-cloud/translate').v2;
+
 
 const key = 'AIzaSyBMb5PxGr6kseebULyDBh0Xe7WeiM2I33k'
 
