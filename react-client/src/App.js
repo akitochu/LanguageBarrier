@@ -164,6 +164,7 @@ function App() {
     chatHeader.style.display = "block"
     header.style.display = "block"
     sendMessage.style.display = "block"
+    messageRef.current.focus()
     fetch('https://extreme-ip-lookup.com/json/?key=CBZijvNC629iYtajlvBl')
     .then( res => res.json())
     .then(response => {
@@ -206,6 +207,7 @@ function App() {
     chatHeader.style.display = "block"
     header.style.display = "none"
     sendMessage.style.display = "none"
+    usernameRef.current.focus()
   }
   
 
