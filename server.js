@@ -8,6 +8,17 @@ const key = 'AIzaSyBMb5PxGr6kseebULyDBh0Xe7WeiM2I33k'
 
 app.use(express.static('react-client/build'))
 
+let usercount = 1234;
+
+app.get('/usercount', (req, res) => {
+    console.log("called")
+    res.status(200).send({
+        value: usercount,
+    })
+    usercount++;
+});
+
+
 app.get('/chat', (req, res) => {
   res.sendFile(__dirname + '/chat.html');
 });
