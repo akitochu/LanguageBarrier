@@ -1,11 +1,13 @@
 
 var express = require('express');
+var cors = require('cors');
 var app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 var axios = require('axios');
 const key = 'AIzaSyBMb5PxGr6kseebULyDBh0Xe7WeiM2I33k'
 
+app.use(cors());
 app.use(express.static('react-client/build'))
 
 let usercount = 1234;
